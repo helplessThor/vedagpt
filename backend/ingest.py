@@ -8,19 +8,29 @@ from sentence_transformers import SentenceTransformer
 CHROMA_DB_DIR = "chroma_db"
 COLLECTION_NAME = "vedas"
 
-# Project Gutenberg Text URLs
+# Archive.org Text URLs (Corrected)
 DATA_SOURCES = {
-    "RigVeda": "https://www.gutenberg.org/cache/epub/20321/pg20321.txt",
-    "YajurVeda": "https://www.gutenberg.org/cache/epub/16575/pg16575.txt",
-    "AtharvaVeda": "https://www.gutenberg.org/cache/epub/12512/pg12512.txt",
-    # Sama Veda is harder to find on Gutenberg as a clean single text, we might skip or find another.
-    # Archive.org link for Sama Veda (Griffith):
-    "SamaVeda": "https://archive.org/stream/TheSamaVeda/sama_veda_djvu.txt" 
+    "RigVeda_Vol1": "https://archive.org/stream/rigveda-tulsiram-vol-1-to-vol-4/Rigveda_Tulsiram_Vol_1_djvu.txt",
+    "RigVeda_Vol2": "https://archive.org/stream/rigveda-tulsiram-vol-1-to-vol-4/Rigveda_Tulsiram_Vol_2_djvu.txt",
+    "RigVeda_Vol3": "https://archive.org/stream/rigveda-tulsiram-vol-1-to-vol-4/Rigveda_Tulsiram_Vol_3_djvu.txt",
+    "RigVeda_Vol4": "https://archive.org/stream/rigveda-tulsiram-vol-1-to-vol-4/Rigveda_Tulsiram_Vol_4_djvu.txt",
+    "SamaVeda": "https://archive.org/stream/samaveda_202212/samaveda_djvu.txt",
+    "YajurVeda": "https://archive.org/stream/yajurveda_202212/yajurveda_djvu.txt",
+    "AtharvaVeda_Vol1": "https://archive.org/stream/atharvaved-vol-1/Atharvaved_Vol1_djvu.txt",
+    "AtharvaVeda_Vol2": "https://archive.org/stream/atharvaved-vol-1/Atharvaved_Vol2_djvu.txt",
 }
 
 def setup_chroma():
     client = chromadb.PersistentClient(path=CHROMA_DB_DIR)
     ef = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
+    
+    # Reset collection to remove old incorrect data
+    try:
+        client.delete_collection(name=COLLECTION_NAME)
+        print(f"Deleted existing collection '{COLLECTION_NAME}' to ensure clean slate.")
+    except Exception:
+        pass # Collection didn't exist
+
     collection = client.get_or_create_collection(name=COLLECTION_NAME, embedding_function=ef)
     return collection
 

@@ -69,11 +69,11 @@ def chat_endpoint(req: ChatRequest):
     
     INSTRUCTIONS:
     - Answer the user's question using the context provided above.
-    - **CRITICAL**: FOR SCIENTIFIC/PHYSICAL QUESTIONS: Include a section called "Modern Scientific Parallel" explaining how the Vedic concept aligns with modern physics, cosmology, etc.
-    - **CRITICAL**: FOR PURELY SPIRITUAL/RELIGIOUS QUESTIONS: Do NOT include scientific parallels. Focus deeply on the philosophical, metaphysical, and ritualistic meaning from the Vedas.
+    - **CRITICAL**: FOR METAPHYSICAL & PHYSICAL QUESTIONS (e.g. Creation, Cosmology, Time, Atoms, Energy, Consciousness etc): YOU MUST include a section called "Modern Scientific Parallel" explaining how the Vedic concept aligns with modern physics/science.
+    - **CRITICAL**: FOR PURELY RELIGIOUS & RITUALISTIC QUESTIONS (e.g. Worship, Deities, Mantras, Ethics, Duties etc): Do NOT include scientific parallels. Keep the answer strictly rooted in the spiritual and philosophical wisdom of the Vedas.
     - If the connection is metaphorical, state it clearly.
     - Be spiritual, respectful, yet scientific and logical where appropriate.
-    - Decode the ancient wisdom into modern, practical terms if the user asks for understanding, but keep it pure if they ask for meaning.
+    - Decode the ancient wisdom into modern, practical terms if the relevant to the question.
     - If the context doesn't fully answer it, use your general knowledge but mention that this specific detail wasn't in the retrieved verses.
     - Cite the Vedas (e.g., 'From RigVeda...') when possible.
     """
