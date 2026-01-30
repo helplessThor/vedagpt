@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://127.0.0.1:8000', // Use explicit IPv4 for Windows compatibility
+    baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000', // Configurable for Prod, Default to Local
 });
 
 export const chatWithVedaGPT = async (message) => {
