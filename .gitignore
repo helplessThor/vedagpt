@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.env
+backend/.env
+
+# Node
+node_modules/
+dist/
+.DS_Store
+
+# VedaGPT Data
+chroma_db/
+backend/chroma_db/
