@@ -37,8 +37,13 @@ chroma_client = chromadb.PersistentClient(path=CHROMA_DB_DIR)
 ef = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
 collection = chroma_client.get_or_create_collection(name=COLLECTION_NAME, embedding_function=ef)
 
+class Message(BaseModel):
+    role: str
+    content: str
+
 class ChatRequest(BaseModel):
     message: str
+    history: list[Message] = []
 
 @app.get("/")
 def read_root():
@@ -47,9 +52,11 @@ def read_root():
 @app.post("/chat")
 def chat_endpoint(req: ChatRequest):
     query = req.message
+    history = req.history
     print(f"Received Query: {query}")
     
-    # 1. Retrieve Context from Vedas
+    # 1. Retrieve Context from Vedas based on CURRENT query
+    # (Future improvement: Summarize history + query for better retrieval)
     results = collection.query(
         query_texts=[query],
         n_results=5
@@ -64,27 +71,36 @@ def chat_endpoint(req: ChatRequest):
     # 2. System Prompt
     system_prompt = f"""You are VedaGPT, a wise and enlightened AI assistant rooted in the knowledge of the 4 Vedas (Rig, Sama, Yajur, Atharva).
     
-    CONTEXT FROM VEDAS:
+    CONTEXT FROM VEDAS (Relevant to the user's latest question):
     {context_str}
     
     INSTRUCTIONS:
-    - Answer the user's question using the context provided above.
-    - **CRITICAL**: FOR METAPHYSICAL & PHYSICAL QUESTIONS (e.g. Creation, Cosmology, Time, Atoms, Energy, Consciousness etc): YOU MUST include a section called "Modern Scientific Parallel" explaining how the Vedic concept aligns with modern physics/science.
+    - **PRIMARY SOURCE**: Use the 'CONTEXT FROM VEDAS' provided above as your primary source of truth.
+    - **FALLBACK**: Only if the provided context does NOT contain the answer, use your general knowledge.
+    - **DISCLAIMER**: If you are answering from general knowledge because the context was insufficient, you MUST start your response with: *"The specific verses for this were not found in the current context, but based on general Vedic knowledge..."*
+    - Answer the user's question using the context provided above and the conversation history.
+    - **CRITICAL**: FOR METAPHYSICAL & PHYSICAL QUESTIONS (e.g. Creation, Cosmology, Time, Atoms, Energy, Consciousness etc): YOU MUST include a section called "Modern Scientific Parallel" in brief explaining how the Vedic concept aligns with modern physics/science.
     - **CRITICAL**: FOR PURELY RELIGIOUS & RITUALISTIC QUESTIONS (e.g. Worship, Deities, Mantras, Ethics, Duties etc): Do NOT include scientific parallels. Keep the answer strictly rooted in the spiritual and philosophical wisdom of the Vedas.
     - If the connection is metaphorical, state it clearly.
     - Be spiritual, respectful, yet scientific and logical where appropriate.
     - Decode the ancient wisdom into modern, practical terms if the relevant to the question.
-    - If the context doesn't fully answer it, use your general knowledge but mention that this specific detail wasn't in the retrieved verses.
     - Cite the Vedas (e.g., 'From RigVeda...') when possible.
     """
     
-    # 3. Call Groq
+    # 3. Build Message Chain for Groq
+    messages = [{"role": "system", "content": system_prompt}]
+    
+    # Append history (limited to last 10 turns to save tokens/complexity if needed, but sending all for now)
+    for msg in history:
+        messages.append({"role": msg.role, "content": msg.content})
+        
+    # Append current user query
+    messages.append({"role": "user", "content": query})
+
+    # 4. Call Groq
     try:
         completion = groq_client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": query}
-            ],
+            messages=messages,
             # model="llama3-70b-8192", # Decommissioned
             model="llama-3.3-70b-versatile",
         )

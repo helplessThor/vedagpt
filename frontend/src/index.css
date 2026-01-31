@@ -3,9 +3,13 @@
 @tailwind utilities;
 
 body {
-    background-color: #1A1A1A;
-    color: #F3F4F6;
+    background-color: #0a090b;
+    /* Fallback */
+    background-color: theme('colors.vedic.bg');
+    color: theme('colors.vedic.text');
+    font-family: 'Outfit', sans-serif;
 }
+
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {

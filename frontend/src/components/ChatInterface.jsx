@@ -23,12 +23,19 @@ const ChatInterface = () => {
         if (!input.trim()) return;
 
         const userMsg = { role: 'user', content: input };
+
+        // Prepare history from existing messages (excluding system prompt & errors)
+        const history = messages
+            .filter(m => m.role !== 'system' && !m.isError)
+            .map(({ role, content }) => ({ role, content }));
+
         setMessages(prev => [...prev, userMsg]);
         setInput('');
         setIsLoading(true);
 
         try {
-            const data = await chatWithVedaGPT(userMsg.content);
+            // Pass history along with the new message
+            const data = await chatWithVedaGPT(userMsg.content, history);
             const botMsg = {
                 role: 'assistant',
                 content: data.response,
@@ -43,12 +50,13 @@ const ChatInterface = () => {
     };
 
     return (
-        <div className="flex flex-col h-screen max-w-4xl mx-auto p-4 font-sans text-gray-200">
+        <div className="flex flex-col w-full font-sans text-gray-200 relative min-h-[80vh]">
 
             {/* Header */}
-            <header className="flex items-center justify-center p-6 mb-4 border-b border-vedic-secondary/30">
+            <header className="flex items-center justify-center p-6 mb-4 border-b border-vedic-secondary/30 relative z-10">
+                <div className="absolute inset-0 bg-vedic-bg/50 backdrop-blur-md -z-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-vedic-primary/10 to-transparent"></div>
                 <Sparkles className="w-8 h-8 text-vedic-primary mr-3 animate-pulse" />
-                <h1 className="text-4xl font-serif text-vedic-accent tracking-wider">VedaGPT</h1>
+                <h1 className="text-5xl font-serif text-vedic-accent tracking-widest drop-shadow-[0_2px_10px_rgba(255,215,0,0.3)]">VedaGPT</h1>
             </header>
 
             {/* Chat Area */}
@@ -57,8 +65,9 @@ const ChatInterface = () => {
                     {messages.map((msg, index) => (
                         <motion.div
                             key={index}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            transition={{ duration: 0.4, ease: "easeOut" }}
                             className={clsx(
                                 "flex items-start gap-4",
                                 msg.role === 'user' ? "flex-row-reverse" : "flex-row"
@@ -72,11 +81,14 @@ const ChatInterface = () => {
                             </div>
 
                             <div className={clsx(
-                                "p-4 rounded-2xl max-w-[80%] shadow-lg backdrop-blur-sm border",
+                                "p-6 rounded-2xl max-w-[85%] shadow-xl backdrop-blur-md border relative overflow-hidden",
                                 msg.role === 'user'
-                                    ? "bg-vedic-secondary/20 border-vedic-primary/30 rounded-tr-none text-right"
-                                    : "bg-vedic-paper border-vedic-secondary/30 rounded-tl-none text-left"
+                                    ? "bg-vedic-secondary/30 border-vedic-primary/30 rounded-tr-none text-right text-vedic-text/90"
+                                    : "bg-vedic-paper/80 border-vedic-accent/20 rounded-tl-none text-left shadow-[0_0_15px_rgba(255,215,0,0.05)]"
                             )}>
+                                {msg.role === 'assistant' && (
+                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-vedic-accent/50 to-transparent opacity-50"></div>
+                                )}
                                 <div className="prose prose-invert max-w-none text-md leading-relaxed">
                                     <ReactMarkdown>{msg.content}</ReactMarkdown>
                                 </div>
@@ -105,10 +117,10 @@ const ChatInterface = () => {
                         animate={{ opacity: 1 }}
                         className="flex items-center gap-3 text-vedic-accent ml-14"
                     >
-                        <div className="w-2 h-2 bg-vedic-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <div className="w-2 h-2 bg-vedic-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <div className="w-2 h-2 bg-vedic-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                        <span className="text-sm font-serif italic opacity-70">Contemplating the verses...</span>
+                        <div className="w-2 h-2 bg-vedic-primary rounded-full animate-bounce shadow-[0_0_8px_var(--tw-shadow-color)] shadow-vedic-primary" style={{ animationDelay: '0ms' }} />
+                        <div className="w-2 h-2 bg-vedic-primary rounded-full animate-bounce shadow-[0_0_8px_var(--tw-shadow-color)] shadow-vedic-primary" style={{ animationDelay: '150ms' }} />
+                        <div className="w-2 h-2 bg-vedic-primary rounded-full animate-bounce shadow-[0_0_8px_var(--tw-shadow-color)] shadow-vedic-primary" style={{ animationDelay: '300ms' }} />
+                        <span className="text-sm font-serif italic text-vedic-accent/70 tracking-wide">Communing with the Cosmos...</span>
                     </motion.div>
                 )}
                 <div ref={messagesEndRef} />
@@ -121,7 +133,7 @@ const ChatInterface = () => {
                     <div className="relative flex items-center bg-vedic-paper rounded-xl p-2 border border-vedic-secondary/50">
                         <input
                             type="text"
-                            className="flex-1 bg-transparent border-none outline-none text-white px-4 py-3 placeholder-gray-500 font-sans text-lg"
+                            className="flex-1 bg-transparent border-none outline-none text-vedic-text px-4 py-3 placeholder-vedic-text/30 font-sans text-lg selection:bg-vedic-accent selection:text-vedic-bg"
                             placeholder="Ask about Dharma, Karma, or Reality..."
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
@@ -136,8 +148,8 @@ const ChatInterface = () => {
                         </button>
                     </div>
                 </div>
-                <p className="text-center text-xs text-gray-600 mt-2 font-serif">
-                    Powered by knowledge from Rig, Sama, Yajur, and Atharva Vedas.
+                <p className="text-center text-xs text-vedic-text/40 mt-3 font-serif tracking-widest uppercase text-[10px]">
+                    Powered by the Eternal Vedas
                 </p>
             </div>
 
