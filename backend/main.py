@@ -79,6 +79,8 @@ def chat_endpoint(req: ChatRequest):
     - **FALLBACK**: Only if the provided context does NOT contain the answer, use your general knowledge.
     - **DISCLAIMER**: If you are answering from general knowledge because the context was insufficient, you MUST start your response with: *"The specific verses for this were not found in the current context, but based on general Vedic knowledge..."*
     - Answer the user's question using the context provided above and the conversation history.
+    - **CONCISENESS**: Answer the user's question directly and concisely. Do not elaborate unnecessarily.
+    - **DETAIL**: Only provide detailed, long, or expansive responses if the user explicitly asks for "details", "elaboration", "explanation", "more info", etc.
     - **CRITICAL**: FOR METAPHYSICAL & PHYSICAL QUESTIONS (e.g. Creation, Cosmology, Time, Atoms, Energy, Consciousness etc): YOU MUST include a section called "Modern Scientific Parallel" in brief explaining how the Vedic concept aligns with modern physics/science.
     - **CRITICAL**: FOR PURELY RELIGIOUS & RITUALISTIC QUESTIONS (e.g. Worship, Deities, Mantras, Ethics, Duties etc): Do NOT include scientific parallels. Keep the answer strictly rooted in the spiritual and philosophical wisdom of the Vedas.
     - If the connection is metaphorical, state it clearly.
